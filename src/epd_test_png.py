@@ -28,7 +28,7 @@ radar_url = "https://beta.meteo.lt/data/radar/radarlarge+36.gif"
 # API info: https://api.meteo.lt
 # observed data for Vilnius
 weather_json_url = "https://api.meteo.lt/v1/stations/vilniaus-ams/observations/latest"
-icon_path = "lib/solid-black/png/128x128/"
+icon_path = "lib/solid-black/png/64x64/"
 
 logging.basicConfig(level=logging.DEBUG)
 # epd = epd7in5b_V2.EPD()
@@ -54,6 +54,30 @@ try:
 
     radar_img = radar_src.crop((50, 70, 530, 420))
 
+    response = requests.get(weather_json_url)
+    weather_json = json.loads(response.content)
+    observatons = dict.get(weather_json,'observations')
+    # print(("Type: ", type(weather_json)))
+    # print(len(observatons))
+    # latest_observation = dict(observatons, len(observatons) - 1)
+    latest = observatons[len(observatons) - 1]
+    airTemperature = dict.get(latest, 'airTemperature')
+    feelsLikeTemperature = dict.get(latest, 'feelsLikeTemperature')
+    windSpeed = dict.get(latest, 'windSpeed')
+    windGust = dict.get(latest, 'windGust')
+    windDirection = dict.get(latest, 'windDirection')
+    participation = dict.get(latest, 'participation')
+    conditionCode = dict.get(latest, 'conditionCode')
+    seaLevelPressure = dict.get(latest, 'seaLevelPressure')
+    relativeHumidity = dict.get(latest, 'relativeHumidity')
+    observationTimeUtc = dict.get(latest, 'observationTimeUtc')
+
+
+    print(("Temp: ", airTemperature, "Feels like", feelsLikeTemperature, "relativeHumidity", relativeHumidity))
+    print(("conditionCode", conditionCode))
+    # print(latest)
+    # print(weather_json)
+    # json.dumps(weather_json).find("observations")    
     logging.info("epd7in5b_V2 meteo radar")
 
     font24 = ImageFont.truetype(r'lib/Font.ttc', 24)
@@ -76,7 +100,7 @@ try:
     draw_black = ImageDraw.Draw(black_image)  # black image canvas
     draw_red = ImageDraw.Draw(red_image)
 
-    radar_offset_x = 0
+    radar_offset_x = 10
     radar_offset_y = 105
 
     # paste to specific location
@@ -84,13 +108,27 @@ try:
     draw_black.rectangle((radar_offset_x, radar_offset_y,
                          480+radar_offset_x, 350 + radar_offset_y), outline=0)
 
-    draw_black.text((2, height-25), ("Atnaujinta " + str_time),
+    draw_black.text((10, height-25), ("Atnaujinta " + str_time),
                     font=font24, fill=0)
-    draw_black.text((1, 1), 'Orai', font=font64, fill=0)
-    draw_black.text((5, 75), 'Radaras', font=font24, fill=0)
+    draw_red.text((10, height-25), ("Atnaujinta " + str_time),
+                    font=font24, fill=0)
+    draw_black.text((5, 1), 'Orai', font=font64, fill=0)
+    
+    text = "%0.1f°C \n%d%% \n%d m/s \n%0.1f mm" % (airTemperature, relativeHumidity, windSpeed, (0 if participation == None else participation))
+    draw_black.text((510, 90), text, font=font64, fill=0)
+    draw_black.text((10, 75), 'Radaras', font=font24, fill=0)
     draw_black.rectangle((0, 0, width-1, height-1), outline=0)
 
+    # weather_img = Image.open(icon_path + "unknown.png")
+    # weather_img = Image.open('lib/solid-black/png/128x128/' + "unknown.png")
+
+    # weather_img.
+    # black_image.paste(weather_img, (510, 1))
+    # out = Image.alpha_composite(black_image, weather_img)
+
+    
     black_image.save("output/output.png", format="png")
+    # black_image.show()
 
 #    display_black(epd.getbuffer(black_image))
 #    epd.display(epd.getbuffer(black_image),epd.getbuffer(red_image))

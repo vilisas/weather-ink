@@ -14,8 +14,9 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
 # picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
-libdir = os.path.join(os.path.dirname(
-    os.path.dirname(os.path.realpath(__file__))), 'lib')
+# libdir = os.path.join(os.path.dirname(
+    # os.path.dirname(os.path.realpath(__file__))), 'lib')
+libdir = "lib/"
 if os.path.exists(libdir):
     sys.path.append(libdir)
 # from waveshare_epd import epd7in5b_V2
@@ -35,7 +36,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def display_black(buffer):
-    #  epd.display(epd.getbuffer(buffer),epd.getbuffer(buffer))
+    # epd.display(epd.getbuffer(buffer),epd.getbuffer(buffer))
     epd.send_command(0x10)
     for i in range(len(buffer)):
         buffer[i] ^= 0xFF
@@ -48,9 +49,9 @@ def display_black(buffer):
 try:
     str_time = time.strftime("%Y-%m-%d %H:%M")
 
-    radar_src = Image.open("lib/radarlarge+36.gif")
-#    response = requests.get(radar_url)
-#    radar_src = Image.open(BytesIO(response.content))
+    # radar_src = Image.open("lib/radarlarge+36.gif")
+    response = requests.get(radar_url)
+    radar_src = Image.open(BytesIO(response.content))
 
     radar_img = radar_src.crop((50, 70, 530, 420))
 
@@ -80,23 +81,22 @@ try:
     # json.dumps(weather_json).find("observations")    
     logging.info("epd7in5b_V2 meteo radar")
 
-    font24 = ImageFont.truetype(r'lib/Font.ttc', 24)
-    font18 = ImageFont.truetype(r'lib/Font.ttc', 18)
-    font64 = ImageFont.truetype(r'lib/Font.ttc', 64)
+    font24 = ImageFont.truetype(libdir + r'Font.ttc', 24)
+    font18 = ImageFont.truetype(libdir + r'Font.ttc', 18)
+    font64 = ImageFont.truetype(libdir + r'Font.ttc', 64)
 
-#    width  = epd.width
-#    height = epd.height
+    # width  = epd.width
+    # height = epd.height
     logging.info(("EPD width=", width, " height=", height))
     logging.info("init and Clear")
-#    epd.init()
-#    epd.Clear()
+    # epd.init()
+    # epd.Clear()
 
     # Drawing on the Horizontal image
     logging.info("1.Drawing on the Horizontal image...")
     black_image = Image.new('1', (width, height), 255)  # 255: clear the frame
     red_image = Image.new('1', (width, height), 255)  # 255: clear the frame
 
-#    Other = Image.new('1', (width, height), 255)  # 255: clear the frame
     draw_black = ImageDraw.Draw(black_image)  # black image canvas
     draw_red = ImageDraw.Draw(red_image)
 
@@ -130,20 +130,17 @@ try:
     black_image.save("output/output.png", format="png")
     # black_image.show()
 
-#    display_black(epd.getbuffer(black_image))
-#    epd.display(epd.getbuffer(black_image),epd.getbuffer(red_image))
-#    time.sleep(2)
-
-#                black                 red
-#    epd.display(epd.getbuffer(Himage),epd.getbuffer(Other))
+    # display_black(epd.getbuffer(black_image))
+    # epd.display(epd.getbuffer(black_image),epd.getbuffer(red_image))
+    # time.sleep(2)
 
     logging.info("Goto Sleep...")
-#    epd.sleep()
+    # epd.sleep()
 
 except IOError as e:
     logging.info(e)
 
 except KeyboardInterrupt:
     logging.info("ctrl + c:")
-#    epd7in5b_V2.epdconfig.module_exit()
+    # epd7in5b_V2.epdconfig.module_exit()
     exit()
